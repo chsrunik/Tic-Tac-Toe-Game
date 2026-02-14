@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Tic Tac Toe</title>
+<h1 class="main-title">
+     <span> chhoppara Srunik !</span>
+</h1>
+<link rel="stylesheet" href="sec.css"/>
+<style>
+body{
+    margin:0;
+    font-family:Segoe UI;
+    background:radial-gradient(circle,#000,#0f2027);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    color:#00ffcc;
+}
+
+.box{
+    background:rgba(0,255,204,0.05);
+    padding:25px;
+    border-radius:20px;
+    backdrop-filter:blur(15px);
+    box-shadow:0 0 25px #00ffcc;
+    text-align:center;
+    width:350px;
+}
+
+input{
+    width:100%;
+    padding:8px;
+    margin:6px 0;
+    border-radius:8px;
+    border:1px solid #00ffcc;
+    background:transparent;
+    color:#00ffcc;
+}
+
+button{
+    width:100%;
+    padding:8px;
+    margin-top:8px;
+    border-radius:20px;
+    border:2px solid #00ffcc;
+    background:transparent;
+    color:#00ffcc;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#00ffcc;
+    color:black;
+}
+
+.hidden{ display:none; }
+
+.game{
+    display:grid;
+    grid-template-columns:repeat(3,90px);
+    gap:10px;
+    justify-content:center;
+    margin-top:15px;
+}
+
+.cell{
+    width:90px;
+    height:90px;
+    border:2px solid #00ffcc;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:30px;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box" id="registerBox">
+    <h3> REGISTER FOR GAME !</h3>
+    <input type="text" id="regUser" placeholder="Create Username">
+    <input type="password" id="regPass" placeholder="Create Password">
+    <button onclick="register()">Register</button>
+    <button onclick="showLogin()">Go to Login</button>
+</div>
+
+<div class="box hidden" id="loginBox">
+    <h3>LOGIN</h3>
+    <input type="text" id="loginUser" placeholder="Username">
+    <input type="password" id="loginPass" placeholder="Password">
+    <button onclick="login()">Login</button>
+</div>
+
+<div class="box hidden" id="gameBox">
+    <h3>Tic Tac Toe</h3>
+
+    <input type="text" id="playerX" placeholder="Player 1 Name (X)">
+    <input type="text" id="playerO" placeholder="Player 2 Name (O)">
+    <button onclick="startGame()">Start Game</button>
+
+    <div class="game" id="game"></div>
+    <p id="status"></p>
+
+    <button onclick="resetGame()">Restart</button>
+    <button onclick="logout()">Logout</button>
+</div>
+
+<script>
+function register(){
+    const user=document.getElementById("regUser").value;
+    const pass=document.getElementById("regPass").value;
+
+    if(user==="" || pass===""){
+        alert("Fill all fields");
+        return;
+    }
+
+    localStorage.setItem("username",user);
+    localStorage.setItem("password",pass);
+    alert("Registered Successfully!");
+    showLogin();
+}
+
+function showLogin(){
+    document.getElementById("registerBox").classList.add("hidden");
+    document.getElementById("loginBox").classList.remove("hidden");
+}
+
+function login(){
+    let savedUser=localStorage.getItem("username");
+    let savedPass=localStorage.getItem("password");
+
+    const user=document.getElementById("loginUser").value;
+    const pass=document.getElementById("loginPass").value;
+
+    if(user===savedUser && pass===savedPass){
+        document.getElementById("loginBox").classList.add("hidden");
+        document.getElementById("gameBox").classList.remove("hidden");
+    } else {
+        alert("Invalid Credentials");
+    }
+}
+
+function logout(){
+    document.getElementById("gameBox").classList.add("hidden");
+    document.getElementById("loginBox").classList.remove("hidden");
+}
+let board=["","","","","","","","",""];
+let currentPlayer="X";
+let gameActive=false;
+let playerNameX="Player X";
+let playerNameO="Player O";
+
+const winPatterns=[
+[0,1,2],[3,4,5],[6,7,8],
+[0,3,6],[1,4,7],[2,5,8],
+[0,4,8],[2,4,6]
+];
+
+function startGame(){
+    playerNameX=document.getElementById("playerX").value || "Player X";
+    playerNameO=document.getElementById("playerO").value || "Player O";
+
+    board=["","","","","","","","",""];
+    currentPlayer="X";
+    gameActive=true;
+
+    createBoard();
+    document.getElementById("status").innerText=playerNameX+"'s Turn (X)";
+}
+
+function createBoard(){
+    const game=document.getElementById("game");
+    game.innerHTML="";
+
+    board.forEach((cell,index)=>{
+        const div=document.createElement("div");
+        div.classList.add("cell");
+        div.dataset.index=index;
+        div.innerText=cell;
+        div.addEventListener("click",handleClick);
+        game.appendChild(div);
+    });
+}
+
+function handleClick(e){
+    const index=e.target.dataset.index;
+
+    if(board[index]!=="" || !gameActive) return;
+
+    board[index]=currentPlayer;
+    e.target.innerText=currentPlayer;
+
+    if(checkWinner()){
+        gameActive=false;
+        return;
+    }
+
+    currentPlayer=currentPlayer==="X"?"O":"X";
+
+    document.getElementById("status").innerText=
+        currentPlayer==="X"
+        ? playerNameX+"'s Turn (X)"
+        : playerNameO+"'s Turn (O)";
+}
+
+function checkWinner(){
+    for(let pattern of winPatterns){
+        let[a,b,c]=pattern;
+
+        if(board[a]!=="" && board[a]===board[b] && board[a]===board[c]){
+            document.getElementById("status").innerText=
+                currentPlayer==="X"
+                ? "🎉 "+playerNameX+" Wins!"
+                : "🎉 "+playerNameO+" Wins!";
+            return true;
+        }
+    }
+
+    if(!board.includes("")){
+        document.getElementById("status").innerText="🤝 It's a Draw!";
+        return true;
+    }
+
+    return false;
+}
+
+function resetGame(){
+    startGame();
+}
+
+</script>
+
+</body>
+</html>

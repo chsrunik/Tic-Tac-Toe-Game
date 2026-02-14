@@ -1,0 +1,15 @@
+.main-title{
+  position:absolute;
+  top:80px;
+  font-size:28px;
+  letter-spacing:2px;
+  color:white;
+  text-transform:uppercase;
+}
+
+.main-title span{
+  color:#00ffcc;
+  text-shadow:0 0 10px #00ffcc,
+              0 0 20px #00ffcc,
+              0 0 40px #00ffcc;
+}
